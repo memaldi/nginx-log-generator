@@ -18,22 +18,23 @@ RUN CGO_ENABLED=0 go build -o /app
 
 # Create the 'nobody' user and group files that will be used in the running container to
 # run the process an unprivileged user.
-RUN mkdir /user && \
-    echo 'nobody:x:65534:65534:nobody:/:' > /user/passwd && \
-    echo 'nobody:x:65534:' > /user/group
+# RUN mkdir /user && \
+#     echo 'nobody:x:65534:65534:nobody:/:' > /user/passwd && \
+#     echo 'nobody:x:65534:' > /user/group
 
 # The final stage
-FROM scratch
+FROM alpine
 
 # Copy the binary from the builder stage
 COPY --from=builder /app /app
 
 # Copy the /etc/passwd file we created in the builder stage. This creates a new
 # non-root user as a security best practice.
-COPY --from=builder /user/group /user/passwd /etc/
+# COPY --from=builder /user/group /user/passwd /etc/
 
 # Run as the new non-root by default
-USER nobody:nobody
+# USER nobody:nobody
 
 # Run the binary
-ENTRYPOINT [ "/app" ]
+# ENTRYPOINT [ "/app", ">", "/tmp/nginx.log"]
+ENTRYPOINT ["/bin/sh", "-c", "/app > /tmp/nginx.log 2>&1"]
